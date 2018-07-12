@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+    <title>icon_addfile</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="切图专用" transform="translate(-46.000000, -49.000000)">
+            <g id="icon_addfile" transform="translate(46.000000, 49.000000)">
+                <g transform="translate(4.000000, 1.000000)">
+                    <path d="M9.92893219,8.8817842e-16 L16,6.07106781 L16,20 L0,20 L0,0 L9.92893219,0 Z" id="Combined-Shape" fill="#87939A"></path>
+                    <path d="M9.24625149,11.154321 L10.8681319,11.154321 L10.8681319,12.4495099 L9.24625149,12.4495099 L9.24625149,14.3148148 L7.71286933,14.3148148 L7.71286933,12.4495099 L6.17948718,12.4495099 L6.17948718,11.154321 L7.71286933,11.154321 L7.71286933,9.57407407 L9.24625149,9.57407407 L9.24625149,11.154321 Z" id="Combined-Shape" fill="#FFFFFF"></path>
+                    <polygon id="Triangle-5" fill="#FFFFFF" transform="translate(10.126172, 6.790637) rotate(-135.000000) translate(-10.126172, -6.790637) " points="10.1261716 5.70730372 12.2690287 7.87397039 7.98331446 7.87397039"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
+    <title>icon_select</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="selectaproject" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(-480.000000, -133.000000)">
+        <g id="popup_selectproject">
+            <g id="option" transform="translate(453.000000, 92.000000)">
+                <g id="icon_select" transform="translate(27.000000, 41.000000)">
+                    <g>
+                        <circle id="1" fill="#52BF53" cx="8" cy="8" r="8"></circle>
+                        <path d="M6.73019592,9.35676318 L11.3483548,4.64553842 L12.7214371,6.01862066 L11.2366838,7.5033739 L6.67087038,12.0926906 L5.35897763,10.7556145 L5.37081094,10.7435427 L3.72143709,9.09416884 L5.09451933,7.7210866 L6.73019592,9.35676318 Z" id="Combined-Shape" fill="#FFFFFF"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
