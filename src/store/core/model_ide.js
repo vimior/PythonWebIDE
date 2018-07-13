@@ -343,7 +343,7 @@ self.renameFile = (fileName) => {
         };
       };
       self.selectNode.path = newPath;
-      self.selectFilePath = self.selectNode.path;
+      // self.selectFilePath = self.selectNode.path;
       self.getFile(newPath);
       self.saveProject(self.getProject);
     };
