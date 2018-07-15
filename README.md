@@ -1,6 +1,6 @@
 # Python-Web-IDE
 -----------
->  一个在线Python的IDE
+>  一个简易的在线Python的IDE
 >  前后端分离
 
 ## 概述
@@ -16,11 +16,11 @@
 - 支持Python代码运行管理和输出
 
 编码:
-![avatar](doc/img/code.png)
+![image](doc/img/ide/code.png)
 补全:
-![avatar](doc/img/complete.png)
+![image](doc/img/ide/complete.png)
 运行:
-![avatar](doc/img/run.png)
+![image](doc/img/ide/run.png)
 
 ## 编译与运行
 ### 前端
@@ -46,7 +46,10 @@ pip install -r requirements.txt
 # 如果前端页面是独立运行的，不可指定后端端口（除非修改前端代码）
 python server.py
 
-#访问
+#访问 (工程保存在backend/projects/ide里面)
 开发运行前端的情况: localhost:8080
 打包好前端的情况: localhost:10086
 ```
+### 后续支持
+- 用户区分
+- 配置文件
