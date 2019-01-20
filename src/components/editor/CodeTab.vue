@@ -3,7 +3,7 @@
     <div class="">
       <div class="float-left top-tab" name="top-tab" :id="getTabId()" :style="{'background': selected? '#3F4955' : 'transparent'}">
         <div class="float-left top-tab-item-border">
-          <div class="float-left" :class="{'tab-left-icon': !selected, 'tab-left-icon-white': selected}" @click="$emit('select-item', item)"></div>
+          <div class="float-left" :class="{'tab-left-icon': !selected, 'tab-left-icon-white': selected}" @click="$emit('select-item', item)" :style='{"background-image": "url("+ icon + ")"}'></div>
           <div class="float-left top-tab-item" @click="$emit('select-item', item)">
             <div class="float-left" :class="{'top-tab-background-color-unselect': !selected, 'top-tab-background-color': selected}">{{ item.name }}</div>
           </div>
@@ -21,6 +21,12 @@ export default {
   props: ['item', 'selected'],
   data() {
     return {
+      fileIcon: {
+        py: require('@/assets/img/ide/language_python.svg'),
+        py2: require('@/assets/img/ide/language-python_white.svg'),
+        doc: require('@/assets/img/ide/icon_documents.svg'),
+        md: require('@/assets/img/ide/icon_md.svg'),
+      },
     };
   },
   methods: {
@@ -34,6 +40,20 @@ export default {
   watch: {
   },
   computed: {
+    icon() {
+      if (this.item.path.indexOf('.py') >= 0) {
+        if (this.selected) {
+          return this.fileIcon.py2;
+        }
+        return this.fileIcon.py;
+      }
+      else if (this.item.path.indexOf('.md') >= 0) {
+        return this.fileIcon.md;
+      }
+      else {
+        return this.fileIcon.doc;
+      }
+    }
   },
   components: {
   },

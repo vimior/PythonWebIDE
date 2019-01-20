@@ -26,6 +26,7 @@ self.dialogInputText = '';
 self.showProjsDialog = false;
 self.showFileDialog = false;
 self.showDeleteDialog = false;
+self.showSettingDialog = false;
 
 self.uniqueArr = (arr) => {
   const result = [];
@@ -42,7 +43,7 @@ self.uniqueArr = (arr) => {
 self.isHasProj = (name) => {
   for (let i = 0; i < self.projList.length; i += 1) {
     if (self.projList[i].name === name) {
-      self.dialogTips = 'Project name is the same';
+      self.dialogTips = 'Project name can not be the same';
       return true;
     }
   }
@@ -54,7 +55,7 @@ self.isRepeatFile = (name, isCreateFile) => {
   if (isCreateFile === true) {
     for (let i = 0; i < self.selectNode.children.length; i++) {
       if (self.selectNode.children[i].name === name) {
-        self.dialogTips = 'The name is the same';
+        self.dialogTips = 'The name cannot be the same';
         return true;
       };
     };
@@ -82,7 +83,7 @@ self.isRepeatFile = (name, isCreateFile) => {
     if (node !== null) {
       for (let i = 0; i < node.children.length; i++) {
         if (name === node.children[i].name) {
-          self.dialogTips = 'The name is the same';
+          self.dialogTips = 'The name cannot be the same';
           return true;
         }
       }
@@ -135,6 +136,9 @@ self.listProjects = (callback) => {
         };
       };
       self.getProject();
+      if (callback) {
+        callback(dict);
+      }
     };
   });
 };
@@ -343,7 +347,7 @@ self.renameFile = (fileName) => {
         };
       };
       self.selectNode.path = newPath;
-      // self.selectFilePath = self.selectNode.path;
+      self.selectFilePath = self.selectNode.path;
       self.getFile(newPath);
       self.saveProject(self.getProject);
     };
@@ -359,6 +363,7 @@ self.createFolder = (folderName) => {
   self.sendCmd(window.GlobalUtil.constant.IDE_CREATE_FOLDER, params, (dict) => {
     if (dict.code === 0) {
       self.curProjAddExpandedKeys(self.selectNode.path);
+      // self.selectFilePath = path.join(self.selectNode.path, folderName);
       self.saveProject(self.getProject);
     };
   });
@@ -387,13 +392,16 @@ self.renameFolder = (folderName) => {
       const name = path.basename(self.selectNode.path);
       const newPath = self.selectNode.path.substring(0, self.selectNode.path.length - name.length) + folderName;
       for (let i = 0; i < self.curProjExpandedKeys.length; i++) {
-        if (self.curProjExpandedKeys[i] === self.selectNode.path) {
-          self.curProjExpandedKeys[i] = newPath;
-          break;
-        };
+        if (self.curProjExpandedKeys[i].indexOf(self.selectNode.path) === 0) {
+          self.curProjExpandedKeys[i] = self.curProjExpandedKeys[i].replace(self.selectNode.path, newPath);
+        }
+        // if (self.curProjExpandedKeys[i] === self.selectNode.path) {
+        //   self.curProjExpandedKeys[i] = newPath;
+        //   break;
+        // };
       };
       self.selectNode.path = newPath;
-      self.selectFilePath = self.selectNode.path;
+      // self.selectFilePath = self.selectNode.path;
       self.saveProject(self.getProject);
     };
   });
@@ -414,6 +422,73 @@ self.autocompletePython = (source, line, column, callback) => {
   });
 }
 
+self.runPipCmd = (id, command) => {
+  const params = {
+    command: command,
+  };
+  self.sendCmd(window.GlobalUtil.constant.RUN_PIP_COMMAND, params, (dict) => {
+    if (dict.code === 0) {
+      if (dict.data === null || dict.data.stdout === undefined || dict.data.stdout === null) {
+        for (let i = 0; i < self.consoleItems.length; i++) {
+          if (self.consoleItems[i].id === dict.id) {
+            self.consoleItems[i].run = true;
+            self.consoleItems[i].output = '';
+            self.consoleItems[i].resultList = [];
+            break;
+          };
+        };
+      }
+      else {
+        for (let i = 0; i < self.consoleItems.length; i++) {
+          if (self.consoleItems[i].id === dict.id) {
+            // 限制保存结果的最大30000行
+            if (self.consoleItems[i].resultList.length > 30000) {
+              self.consoleItems[i].resultList.splice(0, 100);
+            }
+            self.consoleItems[i].resultList.push(`${dict.data.stdout}`);
+            // 限制只刷新选中的Console的结果
+            if (self.selectConsoleItem.id !== self.consoleItems[i].id && window.GlobalUtil.model.socketModel.socketInfo.connected) {
+              break;
+            }
+            // 限制在运行过程中只显示20行结果
+            if (self.consoleItems[i].resultList.length >= 20) {
+              self.consoleItems[i].output = self.consoleItems[i].resultList.slice(self.consoleItems[i].resultList.length - 20).join('\n');
+            }
+            else {
+              self.consoleItems[i].output = self.consoleItems[i].resultList.join('\n');
+            }
+            if (dict.code === 1111 || window.GlobalUtil.model.socketModel.socketInfo.connected === false || dict.code === 10086) {
+              self.consoleItems[i].run = false;
+              self.consoleItems[i].output = self.consoleItems[i].resultList.join('\n');
+            }
+            // self.consoleItems[i].output += '\n' + dict.data.stdout
+            const textArea = document.getElementById('console-' + self.consoleItems[i].id)
+            if (textArea !== undefined && textArea !== null) {
+              textArea.scrollTop = textArea.scrollHeight;
+            }
+            break;
+          };
+        };
+      }
+    }
+    else {
+      for (let i = 0; i < self.consoleItems.length; i++) {
+        if (self.consoleItems[i].id === dict.id) {
+          self.consoleItems[i].resultList.push(`${dict.data.stdout}`);
+          self.consoleItems[i].output = self.consoleItems[i].resultList.join('\n');
+          // self.consoleItems[i].output += '\n' + dict.data.stdout
+          const textArea = document.getElementById('console-' + self.consoleItems[i].id)
+          if (textArea !== undefined && textArea !== null) {
+            textArea.scrollTop = textArea.scrollHeight;
+          }
+          self.consoleItems[i].run = false;
+          break;
+        };
+      };
+    }
+  }, id)
+};
+
 self.runPythonProgram = (id, filePath) => {
   const params = {
     projectName: self.curProjTree.name,
@@ -426,6 +501,7 @@ self.runPythonProgram = (id, filePath) => {
           if (self.consoleItems[i].id === dict.id) {
             self.consoleItems[i].run = true;
             self.consoleItems[i].output = '';
+            self.consoleItems[i].resultList = [];
             break;
           };
         };
@@ -433,7 +509,27 @@ self.runPythonProgram = (id, filePath) => {
       else {
         for (let i = 0; i < self.consoleItems.length; i++) {
           if (self.consoleItems[i].id === dict.id) {
-            self.consoleItems[i].output += '\n' + dict.data.stdout
+            // 限制保存结果的最大30000行
+            if (self.consoleItems[i].resultList.length > 30000) {
+              self.consoleItems[i].resultList.splice(0, 100);
+            }
+            self.consoleItems[i].resultList.push(`${dict.data.stdout}`);
+            // 限制只刷新选中的Console的结果
+            if (self.selectConsoleItem.id !== self.consoleItems[i].id && !window.GlobalUtil.model.socketModel.socketInfo.connected) {
+              break;
+            }
+            // 限制在运行过程中只显示20行结果
+            if (self.consoleItems[i].resultList.length >= 20) {
+              self.consoleItems[i].output = self.consoleItems[i].resultList.slice(self.consoleItems[i].resultList.length - 20).join('\n');
+            }
+            else {
+              self.consoleItems[i].output = self.consoleItems[i].resultList.join('\n');
+            }
+            if (dict.code === 1111 || window.GlobalUtil.model.socketModel.socketInfo.connected === false || dict.code === 10086) {
+              self.consoleItems[i].run = false;
+              self.consoleItems[i].output = self.consoleItems[i].resultList.join('\n');
+            }
+            // self.consoleItems[i].output += '\n' + dict.data.stdout
             const textArea = document.getElementById('console-' + self.consoleItems[i].id)
             if (textArea !== undefined && textArea !== null) {
               textArea.scrollTop = textArea.scrollHeight;
@@ -444,10 +540,11 @@ self.runPythonProgram = (id, filePath) => {
       }
     }
     else {
-      console.log(dict);
       for (let i = 0; i < self.consoleItems.length; i++) {
         if (self.consoleItems[i].id === dict.id) {
-          self.consoleItems[i].output += '\n' + dict.data.stdout
+          self.consoleItems[i].resultList.push(`${dict.data.stdout}`);
+          self.consoleItems[i].output = self.consoleItems[i].resultList.join('\n');
+          // self.consoleItems[i].output += '\n' + dict.data.stdout
           const textArea = document.getElementById('console-' + self.consoleItems[i].id)
           if (textArea !== undefined && textArea !== null) {
             textArea.scrollTop = textArea.scrollHeight;
@@ -461,19 +558,25 @@ self.runPythonProgram = (id, filePath) => {
 };
 
 self.stopPythonProgram = (id) => {
-  const params = {}
+  const params = {
+    program_id: id,
+  }
   self.sendCmd(window.GlobalUtil.constant.STOP_PYTHON_PROGRAM, params, (dict) => {
-    console.log('>>>', dict);
     if (dict.code === 0) {
       if (dict.data === null || dict.data.stdout === undefined || dict.data.stdout === null) {
         return;
       }
       for (let i = 0; i < self.consoleItems.length; i++) {
         if (self.consoleItems[i].id === dict.id) {
-          self.consoleItems[i].output += '\n' + dict.data.stdout
+          self.consoleItems[i].resultList.push(`${dict.data.stdout}`);
+          self.consoleItems[i].output = self.consoleItems[i].resultList.join('\n');
+          // self.consoleItems[i].output += '\n' + dict.data.stdout
           const textArea = document.getElementById('console-' + self.consoleItems[i].id)
           if (textArea !== undefined && textArea !== null) {
-            textArea.scrollTop = textArea.scrollHeight;
+            // textArea.scrollTop = textArea.scrollHeight;
+            setTimeout(() => {
+              textArea.scrollTop = textArea.scrollHeight;
+            }, 200);
           }
           self.consoleItems[i].run = false;
           break;
@@ -483,10 +586,15 @@ self.stopPythonProgram = (id) => {
     else {
       for (let i = 0; i < self.consoleItems.length; i++) {
         if (self.consoleItems[i].id === dict.id) {
-          self.consoleItems[i].output += '\n' + dict.data.stdout
+          self.consoleItems[i].resultList.push(`${dict.data.stdout}`);
+          self.consoleItems[i].output = self.consoleItems[i].resultList.join('\n');
+          // self.consoleItems[i].output += '\n' + dict.data.stdout
           const textArea = document.getElementById('console-' + self.consoleItems[i].id)
           if (textArea !== undefined && textArea !== null) {
-            textArea.scrollTop = textArea.scrollHeight;
+            // textArea.scrollTop = textArea.scrollHeight;
+            setTimeout(() => {
+              textArea.scrollTop = textArea.scrollHeight;
+            }, 200);
           }
           self.consoleItems[i].run = false;
           break;

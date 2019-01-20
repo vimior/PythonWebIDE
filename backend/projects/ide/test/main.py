@@ -2,5 +2,5 @@
 import time
 
 while True:
-  print('main', time.time())
-  time.sleep(1)
+    print('main', time.time())
+    time.sleep(0.1)

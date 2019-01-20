@@ -184,19 +184,51 @@ class IdeCmd(object):
 
     @gen.coroutine
     def run_pip_command(self, client, cmd_id, data):
-        pass
+        command = data.get('command')
+        if not isinstance(command, str) or not command:
+            return response(client, cmd_id, 1111, 'pip command: {} error'.format(command))
+        else:
+            options = data.get('options', [])
+            if not command.startswith('pip'):
+                List = command.split(' ')
+                if len(List) == 1:
+                    cmd = [define.PYTHON, '-u', '-m', 'pip', List[0], ' '.join(options)]
+                elif len(List) > 1:
+                    cmd = [define.PYTHON, '-u', '-m', 'pip', List[0]]
+                    for op in List[1:]:
+                        cmd.append(op)
+                    if List[1] == 'uninstall' and '-y' not in cmd:
+                        cmd.append('-y')
+                    # cmd = [define.PYTHON, '-u', '-m', 'pip', List[0], '{} {}'.format(' '.join(List[1:]), ' '.join(options))]
+                else:
+                    return response(client, cmd_id, 1111, 'cmd error')
+            else:
+                List = command.split(' ')
+                if len(List) == 2:
+                    cmd = [define.PYTHON, '-u', '-m', List[0], List[1], ' '.join(options)]
+                elif len(List) > 2:
+                    cmd = [define.PYTHON, '-u', '-m', List[0], List[1]]
+                    for op in List[2:]:
+                        cmd.append(op)
+                    if List[1] == 'uninstall' and '-y' not in cmd:
+                        cmd.append('-y')
+                    # cmd = [define.PYTHON, '-u', '-m', List[0], List[1], '{} {}'.format(' '.join(List[2:]), ' '.join(options))]
+                else:
+                    return response(client, cmd_id, 1111, 'cmd error')
+            define.subprograms[cmd_id] = SubProgramThread(cmd, cmd_id, client)
+            define.subprograms[cmd_id].start()
+            response(client, cmd_id, 0, None)
 
     @gen.coroutine
     def run_python_program(self, client, cmd_id, data):
         # define.PYTHON
-        print(data)
         prj_name = data.get('projectName')
         prj_path = os.path.join(define.PROJECTS, 'ide', prj_name)
         file_path = os.path.join(prj_path, convert_path(data.get('filePath')))
-        print(file_path)
+        # print(file_path)
         if os.path.exists(file_path) and os.path.isfile(file_path) and file_path.endswith('.py'):
             cmd = [define.PYTHON, '-u', file_path]
-            print(cmd)
+            # print(cmd)
             define.subprograms[cmd_id] = SubProgramThread(cmd, cmd_id, client)
             define.subprograms[cmd_id].start()
             response(client, cmd_id, 0, None)
@@ -224,24 +256,23 @@ class SubProgramThread(threading.Thread):
 
     def response_to_client(self, code, stdout):
         if stdout:
-            data = {
-                'stdout': stdout
-            }
-            res = {
-                'type': 'response',
-                'id': self.cmd_id,
-                'code': code,
-                'data': data
-            }
-            if self.client.connected:
-                try:
-                    self.client.write_message(json.dumps(res, ensure_ascii=False))
-                except:
-                    pass
+            response(self.client, self.cmd_id, code, {'stdout': stdout})
+            # res = {
+            #     'type': 'response',
+            #     'id': self.cmd_id,
+            #     'code': code,
+            #     'data': {'stdout': stdout}
+            # }
+            # if self.client.connected:
+            #     try:
+            #         self.client.write_message(json.dumps(res, ensure_ascii=False))
+            #     except:
+            #         pass
 
     def run_python_program(self):
         start_time = time.time()
-        print('run_python_program:', self.cmd_id)
+        p = None
+        print('[Program {} is start]'.format(self.cmd_id))
         try:
             p = subprocess.Popen(self.cmd, shell=False, universal_newlines=True,
                                  stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -250,7 +281,7 @@ class SubProgramThread(threading.Thread):
                     self.alive = False
                     p.kill()
                     define.subprograms.pop(self.cmd_id)
-                    print('client is disconnect, kill program')
+                    print('[Program {} is kill][client is disconnect]'.format(self.cmd_id))
                     return
                 stdout = p.stdout.readline()
                 stdout = stdout.strip()
@@ -260,7 +291,7 @@ class SubProgramThread(threading.Thread):
                 self.response_to_client(1111, '[program is terminate]')
                 p.kill()
                 define.subprograms.pop(self.cmd_id)
-                print('[program {} is terminate]'.format(self.cmd_id))
+                print('[Program {} is terminate]'.format(self.cmd_id))
                 return
             try:
                 stdout = p.stdout.read()
@@ -274,15 +305,15 @@ class SubProgramThread(threading.Thread):
             self.response_to_client(1111, stdout)
             define.subprograms.pop(self.cmd_id)
             if p.returncode == 0:
-                print('subprogram {} success'.format(self.cmd_id))
+                print('Program {} success'.format(self.cmd_id))
                 p.kill()
                 return 'ok'
             else:
-                print('subprogram {} failed'.format(self.cmd_id))
+                print('Program {} failed'.format(self.cmd_id))
                 p.kill()
                 return 'failed'
         except Exception as e:
-            print(e)
+            print('[Program {} is exception], {}'.format(self.cmd_id, e))
         finally:
             try:
                 p.kill()

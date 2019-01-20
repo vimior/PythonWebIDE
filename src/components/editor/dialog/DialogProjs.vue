@@ -22,7 +22,7 @@
               <td>{{ data.ctime }}</td>
               <td>
                 <div class="float-left proj-selected" v-if="model.ideModel.curProjTree.name === data.name"></div>
-                <div class="float-left proj-open" v-if="model.ideModel.curProjTree.name !== data.name" @click="onSelect(data.name)">Open</div>
+                <div class="float-left proj-open" v-if="model.ideModel.curProjTree.name !== data.name" @click="onSelect(data.name)">{{ $t('open') }}</div>
                 <!-- btn_trash.svg -->
                 <div class="proj-icon-trash float-left" v-if="model.ideModel.curProjTree.name !== data.name" @click="onDelete(data.name)"></div>
               </td>
@@ -49,20 +49,62 @@ export default {
       en: {
         title: 'Select a Project',
         projectName: 'Project name',
+        newProjectTitle: 'New project name',
         date: 'Date',
         type: 'Type',
+        open: 'Open',
         Delete: 'Delete',
         option: 'Option',
         newProject: 'New Project',
+        deletePro: 'Are you sure delete Project',
+        newProName: 'New project name',
+        export: 'Export',
+        import: 'Import',
+        uploadSuccess: 'Upload success',
+        uploadFailed: 'Upload failed, content error',
+        uploadUnCompatible: 'Engineering is not compatible',
+        uploadFmtLimit: 'Only supports .gz format',
+        uploadSizeLimit: 'Upload size can not over 10M',
+        deleteConfirmTitle: 'Tips',
+        deleteConfirmMsg: 'Delete this project?',
+        deleteConfirmButtonText: 'Delete',
+        deleteCancelButtonText: 'Cancel',
+        downloadSuccess: 'Download success',
+        downloadFailed: 'Download failed',
+        selectConfirmTitle: 'Warning',
+        selectConfirmMsg: 'Are you stop all program and switching project?',
+        selectConfirmButtonText: 'Stop and switch',
+        selectCancelButtonText: 'Cancel',
       },
       cn: {
         title: '请选择一个项目',
-        projectName: '',
+        projectName: '工程名',
+        newProjectTitle: '新建工程名',
         date: '时间',
         type: '类型',
+        open: '打开',
         Delete: '删除',
-        option: 'Option',
+        option: '选项',
         newProject: '新建项目',
+        deletePro: '确定删除项目',
+        newProName: '新建项目名',
+        export: '导出',
+        import: '导入',
+        uploadSuccess: '上传成功',
+        uploadFailed: '上传失败, 内容不对',
+        uploadUnCompatible: '上传的工程与机械臂不兼容',
+        uploadFmtLimit: '只支持.gz格式',
+        uploadSizeLimit: '上传大小不能超过10M',
+        deleteConfirmTitle: '提示',
+        deleteConfirmMsg: '是否删除工程?',
+        deleteConfirmButtonText: '删除',
+        deleteCancelButtonText: '取消',
+        downloadSuccess: '下载成功',
+        downloadFailed: '下载失败',
+        selectConfirmTitle: '警告',
+        selectConfirmMsg: '是否停止所有运行中的程序并切换工程?',
+        selectConfirmButtonText: '停止并切换',
+        selectCancelButtonText: '取消',
       },
     },
   },
@@ -82,7 +124,7 @@ export default {
     },
     addProj() {
       this.model.ideModel.dialogType = 'create-project';
-      this.model.ideModel.dialogTitle = 'New project name';
+      this.model.ideModel.dialogTitle = this.$t('newProjectTitle');
       this.model.ideModel.dialogInputText = '';
       this.model.ideModel.dialogTips = '';
       this.model.ideModel.showFileDialog = true;
@@ -93,9 +135,9 @@ export default {
     },
     onSelect(projectName) {
       if (this.hasRunProgram()) {
-        this.$confirm('Are you stop all program and select other project?', 'Warning', {
-          confirmButtonText: 'Stop and select',
-          cancelButtonText: 'Cancel',
+        this.$confirm(this.$t('selectConfirmMsg'), this.$t('selectConfirmTitle'), {
+          confirmButtonText: this.$t('selectConfirmButtonText'),
+          cancelButtonText: this.$t('selectCancelButtonText'),
           type: 'warning',
         }).then(() => {
           this.stopAll();
@@ -117,7 +159,19 @@ export default {
     },
     onDelete(projectName) {
       console.log('delete', projectName);
-      this.model.ideModel.deleteProject(projectName)
+      this.$confirm(this.$t('deleteConfirmMsg'), this.$t('deleteConfirmTitle'), {
+        type: 'warning',
+        showClose: true,
+        confirmButtonText: this.$t("deleteConfirmButtonText"),
+        cancelButtonText: this.$t("deleteCancelButtonText"),
+      })
+      .then(() => {
+        this.model.ideModel.deleteProject(projectName);
+      })
+      .catch(() => {
+        // cancel
+      });
+      // this.model.ideModel.deleteProject(projectName)
     },
     hasRunProgram() {
       for (let i = 0; i < this.model.ideModel.consoleItems.length; i++) {

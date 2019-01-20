@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="file-path">{{ item.path }}</div>
+    <div class="file-path">/{{ model.ideModel.curProjTree.name + item.path }}</div>
     <codemirror
       v-model="item.content"
       style="width:100%;"
@@ -50,26 +50,30 @@ export default {
         tabSize: 4,
         theme: 'monokai',
         extraKeys: {
-          Tab: (cm) => {
-            const cursor = this.codemirror.getCursor();
-            const line = this.codemirror.getLine(cursor.line);
-            let list = line.split(' ');
-            list = list[list.length - 1].split('.');
-            const self = this;
-            self.complete_prefix = list[list.length - 1];
-            self.model.ideModel.autocompletePython(self.codemirror.getValue(), cursor.line, cursor.ch, (dict) => {
-              const completeDatas = dict.data;
-              // console.log(`completeDatas = ${JSON.stringify(completeDatas)}`);
-              const prefix = [];
-              if (self.complete_prefix !== '.' && self.complete_prefix !== '*' && self.complete_prefix !== '?' && self.complete_prefix !== '+') {
-                prefix.push(self.complete_prefix);
-              }
-              let allDatas = PythonHint.concat(completeDatas).concat(prefix);
-              allDatas = self.model.ideModel.uniqueArr(allDatas);
-              CodeMirror.registerHelper('hintWords', 'python', allDatas);
-              cm.showHint({ hint: CodeMirror.hint.anyword })
-            });
+          Tab: function(cm) {
+            var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+            cm.replaceSelection(spaces);
           },
+          // Tab: (cm) => {
+          //   const cursor = this.codemirror.getCursor();
+          //   const line = this.codemirror.getLine(cursor.line);
+          //   let list = line.split(' ');
+          //   list = list[list.length - 1].split('.');
+          //   const self = this;
+          //   self.complete_prefix = list[list.length - 1];
+          //   self.model.ideModel.autocompletePython(self.codemirror.getValue(), cursor.line, cursor.ch, (dict) => {
+          //     const completeDatas = dict.data;
+          //     // console.log(`completeDatas = ${JSON.stringify(completeDatas)}`);
+          //     const prefix = [];
+          //     if (self.complete_prefix !== '.' && self.complete_prefix !== '*' && self.complete_prefix !== '?' && self.complete_prefix !== '+') {
+          //       prefix.push(self.complete_prefix);
+          //     }
+          //     let allDatas = PythonHint.concat(completeDatas).concat(prefix);
+          //     allDatas = self.model.ideModel.uniqueArr(allDatas);
+          //     CodeMirror.registerHelper('hintWords', 'python', allDatas);
+          //     cm.showHint({ hint: CodeMirror.hint.anyword })
+          //   });
+          // },
           // F11键切换全屏
           F11: (cm) => {
             console.log('F11');
@@ -88,6 +92,9 @@ export default {
         lineNumbers: true,
         line: true,
         lineWrapping: true,
+        smartIndent: true,
+        indentUnit: 4,
+        showCursorWhenSelecting: true,
         matchBrackets: true,
         autoCloseBrackets: true,
         foldGutter: true,
@@ -113,7 +120,7 @@ export default {
         let list = line.split(' ');
         list = list[list.length - 1].split('.');
         self.complete_prefix = list[list.length - 1];
-        if (cursor.ch === 0) {
+        if (cursor.ch === 0 || !self.complete_prefix || self.complete_prefix.endsWith(':') || self.complete_prefix.endsWith(')')) {
           this.model.ideModel.writeFile(this.item.path, curVal, false);
           return;
         }

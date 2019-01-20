@@ -75,6 +75,7 @@ export default {
   position: absolute;
   left: 130px;
   top: 70px;
+  text-align: center;
   /* height: 67px; */
   font-family: 'Gotham-Medium';
   font-size: 16px;

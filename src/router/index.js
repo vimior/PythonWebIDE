@@ -11,10 +11,10 @@ export default new Router({
       name: 'Editor',
       component: Editor
     },
-    {
-      path: '/editor',
-      name: 'Editor',
-      component: Editor
-    }
+    // {
+    //   path: '/editor',
+    //   name: 'Editor',
+    //   component: Editor
+    // }
   ]
 })

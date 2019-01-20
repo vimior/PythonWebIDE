@@ -10,9 +10,9 @@
       <div id="right-frame" class="right-frame float-right">
         <div class="float-left top-tab">
           <!-- <div class="float-left" style="height:20px;width:1px;"></div> -->
-          <template v-for="item in model.ideModel.codeItems">
+          <template v-for="(item, index) in model.ideModel.codeItems">
             <CodeTab :item="item"
-              :key="item.path"
+              :key="item.path + index"
               v-on:select-item="selectFile"
               v-on:close-item="closeFile"
               :selected="model.ideModel.selectFilePath === item.path">
@@ -20,35 +20,36 @@
           </template>
         </div>
         <div class="float-left code-editor-frame">
-          <template v-for="item in model.ideModel.codeItems">
+          <template v-for="(item, index) in model.ideModel.codeItems">
             <CodeEditor 
               :item="item"
-              :key="item.path"
+              :key="item.path + index"
               v-if="model.ideModel.selectFilePath === item.path" 
               v-on:update-item="updateItem"></CodeEditor>
           </template>
         </div>
         <div class="float-left console-tab" v-if="showConsole">
-          <template v-for="item in model.ideModel.consoleItems">
+          <template v-for="(item, index) in model.ideModel.consoleItems">
             <ConsoleTab :item="item"
-              :key="item.path"
+              :key="item.path + index"
               v-on:select-item="selectConsole"
               v-on:close-item="closeConsoleSafe"
               :selected="model.ideModel.selectConsoleItem.path === item.path && model.ideModel.selectConsoleItem.id === item.id">
             </ConsoleTab>
           </template>
-          <div class="run-icon float-right" v-if="model.ideModel.selectConsoleItem.run === false" @click="run()" title='Run'></div>
-          <div class="stop-icon float-right" v-if="model.ideModel.selectConsoleItem.run === true" @click="stop()" title='Stop'></div>
+          <div class="run-icon float-right" v-if="model.ideModel.selectConsoleItem.run === false && !(model.ideModel.selectConsoleItem.name === 'Terminal' && model.ideModel.selectConsoleItem.path === 'Terminal')" @click="run()" :title="$t('run')"></div>
+          <div class="stop-icon float-right" v-if="model.ideModel.selectConsoleItem.run === true" @click="stop()" :title="$t('stop')"></div>
         </div>
         <div class="float-left console-frame">
-          <template v-for="item in model.ideModel.consoleItems">
+          <template v-for="(item, index) in model.ideModel.consoleItems">
             <Console 
-              :key="item.path"
+              :key="item.path + index"
               :item="item" 
               v-if="model.ideModel.selectConsoleItem.path === item.path && model.ideModel.selectConsoleItem.id === item.id">
             </Console>
           </template>
         </div>
+        <CmdRun class="float-left result-frame"></CmdRun>
       </div>
       <DialogProjs v-if="model.ideModel.showProjsDialog"></DialogProjs>
       <DialogText v-if="model.ideModel.showFileDialog"></DialogText>
@@ -63,6 +64,7 @@ import TopMenu from './editor/TopMenu';
 import CodeTab from './editor/CodeTab';
 import Console from './editor/Console';
 import ConsoleTab from './editor/ConsoleTab';
+import CmdRun from './editor/CmdRun';
 import ElTree from './editor/ElTree';
 import CodeEditor from './editor/CodeEditor';
 import DialogProjs from './editor/dialog/DialogProjs';
@@ -74,9 +76,13 @@ export default {
     messages: {
       en: {
         ide: 'IDE',
+        run: 'Rerun the script pointed to by the current console',
+        stop: 'Stop the script or command that the current console is running',
       },
       cn: {
         ide: '集成开发环境',
+        run: '重新运行当前控制台指向的脚本',
+        stop: '停止当前控制台运行的脚本或命令',
       },
     },
   },
@@ -87,7 +93,7 @@ export default {
   },
   mounted() {
     window.addEventListener('resize', this.resize);
-    this.model.ideModel.getProject();
+    setTimeout(this.model.ideModel.listProjects, 200);
   },
   computed: {
     showConsole() {
@@ -162,26 +168,48 @@ export default {
     closeConsole(item) {
       const consoleItems = []
       for (let i = 0; i < this.model.ideModel.consoleItems.length; i++) {
-        if (item.path !== this.model.ideModel.consoleItems[i].path || item.id !== this.model.ideModel.consoleItems[i].id) {
-          consoleItems.push(this.model.ideModel.consoleItems[i])
+        if (item.name === 'Terminal' && item.path === 'Terminal') {
+          if (item.id !== this.model.ideModel.consoleItems[i].id) {
+            consoleItems.push(this.model.ideModel.consoleItems[i]);
+          }
+          else {
+            if (i > 0) {
+              this.model.ideModel.selectConsoleItem = this.model.ideModel.consoleItems[i - 1];
+            }
+            else if (i < this.model.ideModel.consoleItems.length - 1) {
+              this.model.ideModel.selectConsoleItem = this.model.ideModel.consoleItems[i + 1];
+            }
+          }
         }
         else {
-          if (i > 0) {
-            this.model.ideModel.selectConsoleItem = this.model.ideModel.consoleItems[i - 1];
+          if (item.path !== this.model.ideModel.consoleItems[i].path || item.id !== this.model.ideModel.consoleItems[i].id) {
+            consoleItems.push(this.model.ideModel.consoleItems[i]);
           }
-          else if (i < this.model.ideModel.consoleItems.length - 1) {
-            this.model.ideModel.selectConsoleItem = this.model.ideModel.consoleItems[i + 1];
+          else {
+            if (i > 0) {
+              this.model.ideModel.selectConsoleItem = this.model.ideModel.consoleItems[i - 1];
+            }
+            else if (i < this.model.ideModel.consoleItems.length - 1) {
+              this.model.ideModel.selectConsoleItem = this.model.ideModel.consoleItems[i + 1];
+            }
           }
         }
       }
       this.model.ideModel.consoleItems = consoleItems;
+      if (this.model.ideModel.consoleItems.length === 0) {
+        this.model.ideModel.selectConsoleItem = {};
+      }
       this.resize();
     },
     resize() {
+      const ele = document.getElementById('left-frame');
+      if (ele !== undefined && ele !== null) {
+        ele.style.height = `${window.innerHeight - 30}px`;
+      }
       for (let i = 0; i < this.model.ideModel.codeItems.length; i++) {
         if (this.model.ideModel.codeItems[i].codemirror !== null) {
           // this.model.ideModel.codeItems[i].codemirror.setSize('auto', this.model.ideModel.consoleItems.length === 0 ? window.innerHeight - 120 : window.innerHeight - 355)
-          this.model.ideModel.codeItems[i].codemirror.setSize('auto', this.model.ideModel.consoleItems.length === 0 ? window.innerHeight - 73 : window.innerHeight - 308)
+          this.model.ideModel.codeItems[i].codemirror.setSize('auto', this.model.ideModel.consoleItems.length === 0 ? window.innerHeight - 102 : window.innerHeight - 338)
         }
       }
     },
@@ -202,6 +230,7 @@ export default {
     CodeTab,
     Console,
     ConsoleTab,
+    CmdRun,
     ElTree,
     CodeEditor,
     DialogProjs,
@@ -254,15 +283,15 @@ body {
   /* width:200px; */
   width: 200px;
   height: 100%;
-  overflow-y: scroll;
-  overflow-x: scroll;
+  overflow-y: auto;
+  overflow-x: auto;
   background: #2E3032;
   /* scrollbar-track-color: #3C3F41; */
   /* SCROLLBAR-TRACK-COLOR: aquamarine; */
 }
 .left-frame::-webkit-scrollbar {/*滚动条整体样式*/
-  width: 4px;     /*高宽分别对应横竖滚动条的尺寸*/
-  height: 4px;
+  width: 6px;     /*高宽分别对应横竖滚动条的尺寸*/
+  height: 6px;
 }
 .left-frame::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
   background: #87939A;
@@ -321,5 +350,14 @@ body {
   margin:0px;
   /* overflow-y: scroll;
   overflow-x: scroll; */
+}
+.result-frame {
+  /* position: absolute; */
+  background-color:#e9e6d3;
+  /*position:absolute;*/
+  left:0px;
+  bottom:0px;
+  padding:0px;
+  margin:0px;
 }
 </style>

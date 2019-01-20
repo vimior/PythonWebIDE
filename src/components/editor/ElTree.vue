@@ -7,7 +7,10 @@
       node-key="uuid"
       ref="tree"
       highlight-current
-      :default-expanded-keys="model.ideModel.curProjExpandedKeys"
+      :expand-on-click-node="false"
+      :indent=12
+      :render-content="renderContent"
+      :default-expanded-keys="curProjExpandedKeys"
       @node-expand="nodeExpand"
       @node-collapse="nodeCollapse"
       @node-click="handleNodeClick"
@@ -24,6 +27,13 @@ export default {
     return {
       model: window.GlobalUtil.model,
       getFile: true,
+      fileIcon: {
+        py: require('@/assets/img/ide/language_python.svg'),
+        doc: require('@/assets/img/ide/icon_documents.svg'),
+        md: require('@/assets/img/ide/icon_md.svg'),
+        folder: require('@/assets/img/ide/icon_folder.svg'),
+        openfolder: require('@/assets/img/ide/icon_openfolder.svg'),
+      },
     }
   },
   defaultProps: {
@@ -45,11 +55,41 @@ export default {
     },
     handleNodeClick(data) {
       this.model.ideModel.selectNode = data;
-      if (this.getFile === true) {
+      if (this.getFile === true && data.type === 'file') {
         this.model.ideModel.getFile(data.path);
       }
       this.getFile = true;
     },
+    renderContent(h, { node, data, store }) {
+      let textColorStyle = data !== null && this.model.ideModel.selectFilePath === data.path && data.type === 'file' ? 'color:#4F7597;' : 'color:#A6A6A6;';
+      textColorStyle = `${textColorStyle}font-family:'Gotham-Book';letter-spacing:-0.8px;padding-left:20px;`;
+      let url = '';
+      if (data.type === 'file') {
+        if (data.path.indexOf('.py') >= 0) {
+          url = this.fileIcon.py;
+        }
+        else if (data.path.indexOf('.md') >= 0) {
+          url = this.fileIcon.md;
+        }
+        else {
+          url = this.fileIcon.doc;
+        }
+      }
+      else if (data.type === 'dir' || data.type === 'folder') {
+        url = this.fileIcon.folder;
+        if (this.model.ideModel.curProjExpandedKeys.includes(data.path)) {
+          url = this.fileIcon.openfolder;
+        }
+      }
+      const urlstyle = `background:url('${url}') no-repeat center left;${textColorStyle}`;
+      return (
+          <span class="">
+            <span style={urlstyle}>
+              { data.label }
+            </span>
+          </span>
+      );
+    }
   },
   mounted() {
     this.model.ideModel.projElTree = this.$refs.tree;
@@ -84,11 +124,67 @@ export default {
   computed: {
     counter () {
       return this.$store.state.model.counter
+    },
+    curProjExpandedKeys() {
+      if (this.model.ideModel.curProjExpandedKeys !== undefined) {
+        this.model.ideModel.curProjExpandedKeys.sort();
+        const curProjExpandedKeys = []
+        for (let i = 0; i < this.model.ideModel.curProjExpandedKeys.length; i++) {
+          let prefix = '';
+          const tmp = this.model.ideModel.curProjExpandedKeys[i].split('/');
+          let flag = true;
+          for (let j = 0; j < tmp.length; j++) {
+            if (tmp[j]) {
+              prefix += '/' + tmp[j]
+              if (this.model.ideModel.curProjExpandedKeys.indexOf(prefix) < 0) {
+                flag = false;
+                break;
+              }
+            }
+            else {
+              if (this.model.ideModel.curProjExpandedKeys.indexOf('/') < 0) {
+                flag = false;
+                break;
+              }
+            }
+          }
+          if (flag) {
+            if (curProjExpandedKeys.indexOf(this.model.ideModel.curProjExpandedKeys[i]) < 0) {
+              curProjExpandedKeys.push(this.model.ideModel.curProjExpandedKeys[i]);
+            }
+          }
+        };
+        return curProjExpandedKeys;
+      }
+      else {
+        return [];
+      }
     }
   }
 }
 </script>
 <style>
+.tree {
+  overflow-y: auto;
+  overflow-x: auto;
+  /* width:80px;
+  height: 500px; */
+}
+.el-tree {
+  /* min-width: 100%; */
+  display:inline-block !important;
+}
+
+.tree::-webkit-scrollbar {/*滚动条整体样式*/
+  width: 4px;     /*高宽分别对应横竖滚动条的尺寸*/
+  height: 4px;
+}
+.tree::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+  background: #87939A;
+}
+.tree::-webkit-scrollbar-track {/*滚动条里面轨道*/
+  background: #2F2F2F;
+}
 .ide-project-list .el-tree-node__content {
   /* height: 56px; */
   color: white;

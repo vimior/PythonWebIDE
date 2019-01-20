@@ -11,16 +11,16 @@
         <div class="position-absolute dialog-error"> {{ model.ideModel.dialogTips }} </div>
         <div class="position-absolute" style="bottom:0px;">
           <div class="float-left btn-cancel" @click="closeMyself">
-            Cancel
+            {{ $t('cancel') }}
           </div>
           <span v-if="checkInput">
             <div class="float-left btn-create cursor-pointer" @click="oncreate">
-              OK
+              {{ $t('ok') }}
             </div>
           </span>
           <span v-else>
             <div class="float-left btn-create btn-create-opacity">
-              OK
+              {{ $t('ok') }}
             </div>
           </span>
         </div>
@@ -34,6 +34,26 @@
 const path = require('path')
 
 export default {
+  i18n: {
+    messages: {
+      en: {
+        ok: 'OK',
+        cancel: 'Cancel',
+        confirmTitle: 'Warning',
+        confirmMsg: 'Are you stop all program and create a new project?',
+        confirmButtonText: 'Stop and create',
+        cancelButtonText: 'Cancel',
+      },
+      cn: {
+        ok: '确定',
+        cancel: '取消',
+        confirmTitle: '警告',
+        confirmMsg: '是否停止所有运行中的程序并创建新工程?',
+        confirmButtonText: '停止并创建',
+        cancelButtonText: '取消',
+      },
+    },
+  },
   data() {
     return {
       model: window.GlobalUtil.model,
@@ -82,9 +102,9 @@ export default {
       }
       else if (this.model.ideModel.dialogType === 'create-project') {
         if (this.hasRunProgram()) {
-          this.$confirm('Are you stop all program and create a new project?', 'Warning', {
-            confirmButtonText: 'Stop and create',
-            cancelButtonText: 'Cancel',
+          this.$confirm(this.$t('confirmMsg'), this.$t('confirmTitle'), {
+            confirmButtonText: this.$t('confirmButtonText'),
+            cancelButtonText: this.$t('cancelButtonText'),
             type: 'warning',
           }).then(() => {
             this.stopAll();

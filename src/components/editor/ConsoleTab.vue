@@ -3,9 +3,9 @@
     <div class="">
       <div class="float-left console-tab" name="console-tab" :id="getTabId()" :style="{'background': selected? '#3F4955' : 'transparent'}">
         <div class="float-left console-tab-item-border">
-          <div class="float-left" :class="{'tab-left-icon': !selected, 'tab-left-icon-white': selected}" @click="$emit('select-item', item)"></div>
+          <div class="float-left" :class="{'tab-left-icon': !selected, 'tab-left-icon-white': selected}" @click="$emit('select-item', item)" :style='{"background-image": "url("+ icon + ")"}'></div>
           <div class="float-left console-tab-item" @click="$emit('select-item', item)">
-            <div class="float-left" :class="{'console-tab-background-color-unselect': !selected, 'console-tab-background-color': selected}">{{ selected ? item.path : item.name }}</div>
+            <div class="float-left" :class="{'console-tab-background-color-unselect': !selected, 'console-tab-background-color': selected}">{{ selected && !(model.ideModel.selectConsoleItem.name === 'Terminal' && model.ideModel.selectConsoleItem.path === 'Terminal') ? '/' + model.ideModel.curProjTree.name + item.path : item.name }}</div>
           </div>
           <div @click="$emit('close-item', item)" class="float-left" :class="{'tab-cancel': !selected, 'tab-cancel-white': selected}"></div>
         </div>
@@ -20,6 +20,13 @@ export default {
   props: ['item', 'selected'],
   data() {
     return {
+      model: window.GlobalUtil.model,
+      fileIcon: {
+        py: require('@/assets/img/ide/language_python.svg'),
+        py2: require('@/assets/img/ide/language-python_white.svg'),
+        doc: require('@/assets/img/ide/icon_documents.svg'),
+        md: require('@/assets/img/ide/icon_md.svg'),
+      },
     };
   },
   methods: {
@@ -33,6 +40,20 @@ export default {
   watch: {
   },
   computed: {
+    icon() {
+      if (this.item.path.indexOf('.py') >= 0) {
+        if (this.selected) {
+          return this.fileIcon.py2;
+        }
+        return this.fileIcon.py;
+      }
+      else if (this.item.path.indexOf('.md') >= 0) {
+        return this.fileIcon.md;
+      }
+      else {
+        return this.fileIcon.doc;
+      }
+    }
   },
   components: {
   },
