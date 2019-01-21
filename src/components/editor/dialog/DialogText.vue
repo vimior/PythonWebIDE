@@ -6,7 +6,7 @@
       <div class="dialog-content" @click="contentClick">
         <span class="top-title">{{ model.ideModel.dialogTitle }}</span>
         <div>
-          <input id="ide-input-text" v-model="model.ideModel.dialogInputText" type="text" class="position-absolute dialog-input input-focus" />
+          <input id="ide-input-text" v-model="model.ideModel.dialogInputText" type="text" class="position-absolute dialog-input input-focus" @keyup.enter="oncreate"/>
         </div>
         <div class="position-absolute dialog-error"> {{ model.ideModel.dialogTips }} </div>
         <div class="position-absolute" style="bottom:0px;">
@@ -64,7 +64,7 @@ export default {
     if (input !== null && input !== undefined) {
       input.focus();
     }
-    document.onkeydown = this.keyEvent;
+    // document.onkeydown = this.keyEvent;
   },
   methods: {
     keyEvent(e) {
