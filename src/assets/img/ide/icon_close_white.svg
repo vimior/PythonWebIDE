@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="6px" height="6px" viewBox="0 0 6 6" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
+    <title>icon_close_white</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="切图专用" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(-986.000000, -52.000000)">
+        <g id="icon_close" transform="translate(986.000000, 52.000000)" fill="#FFFFFF">
+            <path d="M3.97797829,2.95277624 L4.66099011,3.63930397 L5.83839163,4.81670549 L4.74954463,5.90555249 L2.90867429,4.02758464 L1.04032405,5.90555249 L-2.46025422e-13,4.84525817 L1.85509772,2.95277624 L3.97015754e-12,1.06029431 L1.04032405,1.77635684e-15 L2.90867429,1.87796784 L4.74954463,1.99840144e-15 L5.83839163,1.088847 L4.66099011,2.26624851 L3.97797829,2.95277624 Z"></path>
+        </g>
+    </g>
+</svg>

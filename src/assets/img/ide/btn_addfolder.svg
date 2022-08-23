@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="25px" height="24px" viewBox="0 0 25 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49 (51002) - http://www.bohemiancoding.com/sketch -->
+    <title>btn_addfolder</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="切图专用" transform="translate(-81.000000, -50.000000)">
+            <g id="btn_addfolder" transform="translate(81.333333, 50.000000)">
+                <g transform="translate(2.000000, 4.000000)" id="Group-3">
+                    <g>
+                        <path d="M9,3 L20,3 L20,16 L0,16 L0,3 L0,0 L7.81111111,0 L9,3 Z" id="Combined-Shape" fill="#858B92" fill-rule="nonzero"></path>
+                        <path d="M11.2462515,8.15432099 L12.8681319,8.15432099 L12.8681319,9.44950994 L11.2462515,9.44950994 L11.2462515,11.3148148 L9.71286933,11.3148148 L9.71286933,9.44950994 L8.17948718,9.44950994 L8.17948718,8.15432099 L9.71286933,8.15432099 L9.71286933,6.57407407 L11.2462515,6.57407407 L11.2462515,8.15432099 Z" id="Combined-Shape" fill="#FFFFFF"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
