@@ -54,12 +54,12 @@ python server.py
 # 打包好前端的情况: localhost:10086
 ```
 
-![image](docs/img/py_code.png)
+![py_code](docs/img/py_code.png?raw=true)
 
-![image](docs/img/md_code.png)
+![md_code](docs/img/md_code.png?raw=true)
 
-![image](docs/img/py_complete.png)
+![py_complete](docs/img/py_complete.png?raw=true)
 
-![image](docs/img/py_run.png)
+![py_run](docs/img/py_run.png?raw=true)
 
-![image](docs/img/projects.png)
+![projects](docs/img/projects.png?raw=true)
