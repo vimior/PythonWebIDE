@@ -4,7 +4,7 @@ const wsInfoMap = {
   default: {
     location: {
       protocol: 'ws:',
-      host: window.location.host,
+      host: window.location.hostname,
       port: '10086',
       pathname: '/ws',
       search: '?v=1', // 请求参数
